@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "job-pricer", "runtimeExecutable": "bash", "runtimeArgs": ["-lc", "source ~/.nvm/nvm.sh && node server.mjs"], "port": 4350 }
+  ]
+}

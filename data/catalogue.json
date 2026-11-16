@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "status": "DRAFT 9 Nov 2026: days, pass-through and monthly figures are Claude's first guesses for Joe to correct",
+  "notes": "Days are LOW estimates in half days; the engine adds the high estimate, amends, PM and contingency. Kick-off is charged once per job, not per product. stage: concept and design count as design days for the 25% amends; artwork does not. monthly = £ per month, shown as its own line, never in the one-off total.",
+  "kickoff": { "name": "Kick-off, brief and references", "stage": "discovery", "days": 0.5, "daysIfThreePlusProducts": 1 },
+  "groups": ["Brand", "Content", "Digital", "In-House", "Ongoing"],
+  "products": [
+    {
+      "id": "brand-guidelines", "name": "Brand Guidelines", "group": "Brand",
+      "sizes": {
+        "s": { "label": "Essentials", "summary": "Logo tidy, colour, type, basic usage, 10–15 pages", "tasks": [["concept", "Direction and moodboard", 1], ["design", "Logo tidy and lock-ups", 1], ["design", "Colour, type and usage pages", 1.5], ["artwork", "Guidelines PDF and logo pack", 0.5]] },
+        "m": { "label": "Identity", "summary": "New logo (3 routes), palette, type, imagery, tone of voice, 30–40 pages", "tasks": [["concept", "Strategy and moodboards", 1], ["concept", "Logo, three routes", 2.5], ["design", "Chosen route refined", 1.5], ["design", "Colour, type, imagery and tone pages", 3], ["artwork", "Guidelines PDF and full logo pack", 1]] },
+        "l": { "label": "System", "summary": "Identity plus icons, graphic language, templates, 60+ pages", "tasks": [["concept", "Strategy, audit and moodboards", 2], ["concept", "Logo, three routes", 3], ["design", "Chosen route refined", 2], ["design", "Icons and graphic language", 3], ["design", "Full guidelines, 60+ pages", 5], ["artwork", "Guidelines PDF, logo and asset packs", 1.5]] }
+      }
+    },
+    {
+      "id": "brand-portal", "name": "Brand Portal", "group": "Brand",
+      "note": "Overlaps with House Style's Brand Space: Joe to say whether these are one product",
+      "sizes": {
+        "s": { "label": "Page", "summary": "One hosted brand page with downloads", "tasks": [["design", "Portal page design", 1], ["design", "Build and content", 1.5], ["artwork", "Asset uploads and handover", 0.5]], "monthly": 25 },
+        "m": { "label": "Portal", "summary": "Multi-page portal: guidelines, asset library, templates", "tasks": [["concept", "Structure and design direction", 1], ["design", "Portal design", 2], ["design", "Build and content", 3], ["artwork", "Asset library and handover", 1]], "monthly": 50 },
+        "l": { "label": "Brand Space", "summary": "Full living brand site with on-brand studio (House Style engine)", "tasks": [["concept", "Brand file and structure", 1.5], ["design", "Brand Space design and skin", 3], ["design", "Build, studio and content", 5], ["artwork", "Training and handover", 1]], "monthly": 100 }
+      }
+    },
+    {
+      "id": "social-templates", "name": "Social Templates", "group": "Content",
+      "sizes": {
+        "s": { "label": "6 templates", "summary": "Posts and stories, static", "tasks": [["design", "Template designs × 6", 1.5], ["artwork", "Editable files and guide", 0.5]] },
+        "m": { "label": "12 templates", "summary": "Posts, stories, carousels, static", "tasks": [["concept", "Template system direction", 0.5], ["design", "Template designs × 12", 2.5], ["artwork", "Editable files and guide", 0.5]] },
+        "l": { "label": "24 templates", "summary": "Full set including simple motion", "tasks": [["concept", "Template system direction", 1], ["design", "Template designs × 24", 4], ["design", "Motion versions", 1.5], ["artwork", "Editable files and guide", 1]] }
+      }
+    },
+    {
+      "id": "social-strategy", "name": "Social Strategy", "group": "Content",
+      "sizes": {
+        "s": { "label": "Audit", "summary": "Channel audit and content pillars", "tasks": [["concept", "Audit and competitor scan", 1], ["design", "Content pillars and tone", 1]] },
+        "m": { "label": "Plan", "summary": "Audit, pillars and a 3-month content plan", "tasks": [["concept", "Audit and competitor scan", 1], ["design", "Content pillars and tone", 1], ["design", "3-month content plan", 2]] },
+        "l": { "label": "Launch", "summary": "Plan plus launch campaign and monthly reporting set-up", "tasks": [["concept", "Audit, audience and competitors", 1.5], ["design", "Pillars, tone and formats", 1.5], ["design", "3-month plan and launch campaign", 3], ["artwork", "Reporting dashboard set-up", 1]] }
+      }
+    },
+    {
+      "id": "presentations", "name": "Presentations", "group": "Content",
+      "sizes": {
+        "s": { "label": "10 slides", "summary": "One deck, content supplied", "tasks": [["design", "Deck design, 10 slides", 1.5]] },
+        "m": { "label": "25 slides", "summary": "One deck plus master layouts", "tasks": [["concept", "Deck direction", 0.5], ["design", "Deck design, 25 slides", 2.5], ["artwork", "Master layouts", 0.5]] },
+        "l": { "label": "Template", "summary": "Master template plus 40 slides", "tasks": [["concept", "Deck direction", 1], ["design", "Master template", 2], ["design", "40 slides", 3], ["artwork", "Handover and guide", 0.5]] }
+      }
+    },
+    {
+      "id": "photoshoot", "name": "Photoshoot", "group": "Content",
+      "note": "Assumes Joe art-directs and shoots. Crew, studio and kit hire are pass-through guesses",
+      "sizes": {
+        "s": { "label": "Half day", "summary": "Half-day shoot, up to 10 edited images", "tasks": [["concept", "Shot list and planning", 0.5], ["design", "Shoot, half day", 0.5], ["artwork", "Edit and retouch, 10 images", 0.5]], "pass": [["Kit hire", 75]] },
+        "m": { "label": "Full day", "summary": "Full-day shoot, up to 25 edited images", "tasks": [["concept", "Shot list, props and planning", 1], ["design", "Shoot, full day", 1], ["artwork", "Edit and retouch, 25 images", 1.5]], "pass": [["Studio hire", 300], ["Kit hire", 150]] },
+        "l": { "label": "Two days", "summary": "Two-day shoot with assistant, up to 60 images", "tasks": [["concept", "Treatment, casting and planning", 1.5], ["design", "Shoot, two days", 2], ["artwork", "Edit and retouch, 60 images", 3]], "pass": [["Studio hire", 600], ["Kit hire", 300], ["Assistant, two days", 400]] }
+      }
+    },
+    {
+      "id": "videoshoot", "name": "Videoshoot", "group": "Content",
+      "note": "Crew and kit are pass-through guesses",
+      "sizes": {
+        "s": { "label": "One film", "summary": "One-day shoot, one 30–60s film", "tasks": [["concept", "Treatment and shot list", 0.5], ["design", "Shoot, one day", 1], ["artwork", "Edit, grade and sound", 1.5]], "pass": [["Kit hire", 150]] },
+        "m": { "label": "Film + cuts", "summary": "One-day shoot, hero film and 3 social cuts", "tasks": [["concept", "Treatment and shot list", 1], ["design", "Shoot, one day", 1], ["artwork", "Edit, grade and sound", 2], ["artwork", "Social cuts × 3", 1]], "pass": [["Kit hire", 200], ["Music licence", 100]] },
+        "l": { "label": "Campaign", "summary": "Two-day shoot, hero film and 6 cuts", "tasks": [["concept", "Treatment, casting and planning", 2], ["design", "Shoot, two days", 2], ["artwork", "Edit, grade and sound", 4], ["artwork", "Social cuts × 6", 2]], "pass": [["Kit hire", 400], ["Crew, two days", 800], ["Music licence", 200]] }
+      }
+    },
+    {
+      "id": "packaging", "name": "Packaging", "group": "Brand",
+      "sizes": {
+        "s": { "label": "One SKU", "summary": "One label or box", "tasks": [["concept", "Direction, two routes", 1], ["design", "Pack design", 1.5], ["artwork", "Print artwork to dieline", 0.5]] },
+        "m": { "label": "3 SKUs", "summary": "Range of three", "tasks": [["concept", "Range direction, two routes", 1.5], ["design", "Pack designs × 3", 3], ["artwork", "Print artwork × 3", 1.5]] },
+        "l": { "label": "Range", "summary": "Six or more SKUs with 3D mock-ups", "tasks": [["concept", "Range direction and system", 2], ["design", "Pack designs × 6", 5], ["design", "3D mock-ups", 1.5], ["artwork", "Print artwork × 6", 2.5]] }
+      }
+    },
+    {
+      "id": "3d-visuals", "name": "3D product visuals", "group": "Content",
+      "sizes": {
+        "s": { "label": "1 product", "summary": "One product modelled, 3 renders", "tasks": [["design", "Model and materials", 1], ["artwork", "Renders × 3", 1]], "pass": [["3D generation credits", 20]] },
+        "m": { "label": "3 products", "summary": "Three products, 10 renders", "tasks": [["concept", "Look and lighting", 0.5], ["design", "Models and materials × 3", 2.5], ["artwork", "Renders × 10", 2]], "pass": [["3D generation credits", 60]] },
+        "l": { "label": "Interactive", "summary": "3D for the web, interactive viewer", "tasks": [["concept", "Look and interaction", 1], ["design", "Models and materials", 3], ["design", "Web viewer build", 4], ["artwork", "Optimise and handover", 2]], "pass": [["3D generation credits", 100]] }
+      }
+    },
+    {
+      "id": "motion-films", "name": "Motion and launch films", "group": "Content",
+      "sizes": {
+        "s": { "label": "One cut", "summary": "One 15–30s motion film", "tasks": [["concept", "Script and style frames", 0.5], ["design", "Animation", 1.5]] },
+        "m": { "label": "Hero + cuts", "summary": "Hero film and 3 social cuts", "tasks": [["concept", "Script, style frames, shot list", 1], ["design", "Animation", 2.5], ["artwork", "Social cuts × 3 and sound", 1]] },
+        "l": { "label": "Launch pack", "summary": "Hero film, 6 cuts, voice-over, all formats", "tasks": [["concept", "Script, style frames, shot list", 1.5], ["design", "Animation", 4], ["artwork", "Cuts × 6, voice-over and mix", 2]], "pass": [["Voice-over", 150]] }
+      }
+    },
+    {
+      "id": "ai-imagery", "name": "AI imagery and video", "group": "Content",
+      "sizes": {
+        "s": { "label": "10 stills", "summary": "Ten campaign stills", "tasks": [["concept", "Art direction and references", 0.5], ["design", "Generation and selects", 1], ["artwork", "Retouch and upscale", 0.5]], "pass": [["Generation credits", 30]] },
+        "m": { "label": "Stills + clips", "summary": "20 stills and 3 short clips", "tasks": [["concept", "Art direction and references", 1], ["design", "Stills and clips", 2], ["artwork", "Retouch, upscale and edit", 1]], "pass": [["Generation credits", 80]] },
+        "l": { "label": "Campaign", "summary": "Full AI campaign: stills, film, cuts", "tasks": [["concept", "Treatment and character sheets", 1.5], ["design", "Stills and film", 3.5], ["artwork", "Edit, sound and formats", 1.5]], "pass": [["Generation credits", 200]] }
+      }
+    },
+    {
+      "id": "website", "name": "Website", "group": "Digital",
+      "sizes": {
+        "s": { "label": "One page", "summary": "One-page site, content in one data file (like 620 Multi)", "tasks": [["concept", "Structure and direction", 0.5], ["design", "Page design", 1.5], ["design", "Build", 1.5], ["artwork", "Launch and handover", 0.5]], "monthly": 25 },
+        "m": { "label": "5 pages", "summary": "Five-page site", "tasks": [["concept", "Structure and direction", 1], ["design", "Page designs × 5", 3], ["design", "Build", 3], ["artwork", "Launch and handover", 1]], "monthly": 40 },
+        "l": { "label": "10+ pages", "summary": "Larger site, CMS or shop", "tasks": [["concept", "Structure, content plan, direction", 2], ["design", "Page designs", 5], ["design", "Build, CMS or shop", 6], ["artwork", "Launch, training, handover", 1.5]], "monthly": 75 }
+      }
+    },
+    {
+      "id": "apps", "name": "Apps and dashboards", "group": "Digital",
+      "sizes": {
+        "s": { "label": "One tool", "summary": "A single-purpose tool or widget", "tasks": [["concept", "Scope and flow", 0.5], ["design", "Design and build", 4], ["artwork", "Test and handover", 0.5]] },
+        "m": { "label": "App", "summary": "A small app with saved data", "tasks": [["concept", "Scope, flows and data", 1], ["design", "Design", 2], ["design", "Build", 5], ["artwork", "Test and handover", 1]], "monthly": 25 },
+        "l": { "label": "Platform", "summary": "Multi-screen app with logins or integrations", "tasks": [["concept", "Scope, flows and data", 2], ["design", "Design", 4], ["design", "Build", 10], ["artwork", "Test, training and handover", 2]], "monthly": 75 }
+      }
+    },
+    {
+      "id": "house-style", "name": "House Style", "group": "In-House",
+      "summary": "AI brand platform: brand file, Brand Space, on-brand content studio",
+      "sizes": {
+        "s": { "label": "Brand file", "summary": "Brand book turned into a checked brand file", "tasks": [["concept", "Brand analysis and questions", 1], ["design", "Brand file and checks", 1.5]], "monthly": 25 },
+        "m": { "label": "Brand Space", "summary": "Brand file plus a living brand site", "tasks": [["concept", "Brand analysis and questions", 1], ["design", "Brand file and checks", 1.5], ["design", "Brand Space skin and build", 3]], "monthly": 75 },
+        "l": { "label": "Studio", "summary": "Brand Space plus on-brand content studio and checks", "tasks": [["concept", "Brand analysis and questions", 1.5], ["design", "Brand file and checks", 2], ["design", "Brand Space skin and build", 3], ["design", "Studio and creative checks", 4], ["artwork", "Training and handover", 1]], "monthly": 150 }
+      }
+    },
+    {
+      "id": "house-rules", "name": "House Rules", "group": "In-House",
+      "summary": "GUESS: AI that checks the client's work against their brand and rules",
+      "sizes": {
+        "s": { "label": "Checker", "summary": "Brand check for one content type", "tasks": [["concept", "Rules and examples", 1], ["design", "Set-up and testing", 2]], "monthly": 25 },
+        "m": { "label": "Team", "summary": "Checks across content types with reports", "tasks": [["concept", "Rules and examples", 1.5], ["design", "Set-up and testing", 4], ["artwork", "Training", 0.5]], "monthly": 50 },
+        "l": { "label": "Gatekeeper", "summary": "Checks wired into the client's tools", "tasks": [["concept", "Rules, examples and workflow", 2], ["design", "Set-up, integrations and testing", 7], ["artwork", "Training and handover", 1]], "monthly": 100 }
+      }
+    },
+    {
+      "id": "housekeeping", "name": "Housekeeping", "group": "In-House",
+      "summary": "GUESS: AI workflows that keep the client's site, content and admin up to date (like 620 Multi's one data file)",
+      "sizes": {
+        "s": { "label": "One workflow", "summary": "One automated workflow", "tasks": [["concept", "Map the workflow", 0.5], ["design", "Build and test", 2]], "monthly": 25 },
+        "m": { "label": "Three", "summary": "Three connected workflows", "tasks": [["concept", "Map the workflows", 1], ["design", "Build and test", 4.5], ["artwork", "Training", 0.5]], "monthly": 50 },
+        "l": { "label": "In-house team", "summary": "A set of agents running day-to-day tasks", "tasks": [["concept", "Map the business and tasks", 2], ["design", "Build, connect and test", 8], ["artwork", "Training and handover", 1]], "monthly": 150 }
+      }
+    },
+    {
+      "id": "retainer", "name": "Monthly support", "group": "Ongoing",
+      "summary": "Retained days each month; monthly only, no one-off fee",
+      "sizes": {
+        "s": { "label": "2 days", "summary": "2 days a month", "tasks": [], "monthly": 650 },
+        "m": { "label": "4 days", "summary": "4 days a month", "tasks": [], "monthly": 1250 },
+        "l": { "label": "8 days", "summary": "8 days a month", "tasks": [], "monthly": 2400 }
+      }
+    }
+  ]
+}

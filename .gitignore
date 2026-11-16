@@ -1,0 +1,6 @@
+node_modules/
+.env
+quotes/
+public/fonts/
+.DS_Store
+server.log
