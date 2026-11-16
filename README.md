@@ -45,6 +45,14 @@ Pricing is built from the product catalogue in `data/catalogue.json` (17 product
 
 `src/parse.mjs` sends the brief to the Claude API (`claude-opus-5-5`, structured JSON output, server-side refusal fallback on). About 3–4p per brief (measured 9 Nov). The model picks catalogue products and sizes, plus any extra tasks, and returns deliverables, assumptions, exclusions and suggested add-ons with reasons; the server cleans the numbers before the page sees them.
 
+## Invoices
+
+Invoice tab, on the open quote. Set the days actually worked per task; the invoice is priced with the same rules as the quote's low side, as one figure (no contingency, no VAT: not VAT registered). Lines are whole pounds and the total is their sum. Monthly figures are billed separately, never on these invoices.
+
+- Full: one invoice for the work. Deposit: a % of the quoted low total (default 50%). Final: the actual total less the deposits already invoiced for that quote.
+- "Make the PDF" takes the next number (INV-0001 onwards, never reused), freezes the invoice in `invoices/INV-xxxx.json` and prints `invoices/INV-xxxx.pdf` with headless Chrome from the server's own page (`src/invoice-pdf.mjs`). Only paid/unpaid changes after that; the PDF is re-printed to show Paid.
+- Your details (name, trading name, address, email, bank details, days to pay, next number) live in `settings.json`. Both it and `invoices/` are gitignored and exist only on the Mac mini: back them up.
+
 ## Stored quote (for scope watch, later)
 
 Each quote is one JSON file: client, project, deadline, brief, deliverables, tasks, assumptions, exclusions, add-ons, `included` (2 major rounds, 10 tweaks), `status` (draft/sent/agreed), `scopeLog` (empty, for scope watch) and a `totals` snapshot.

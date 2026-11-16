@@ -20,6 +20,7 @@
       <button type="button" data-view="brief" aria-current="page">Brief</button>
       <button type="button" data-view="tasks">Job</button>
       <button type="button" data-view="quote">Quote</button>
+      <button type="button" data-view="invoice">Invoice</button>
       <button type="button" data-view="saved">Saved</button>
     </div>
     <span class="progress" aria-hidden="true"></span>
@@ -102,6 +103,45 @@
           <button type="button" class="btn primary" id="copyBtn">Copy the quote</button>
         </div>
       </div>
+    </section>
+
+    <!-- INVOICE -->
+    <section class="view" id="view-invoice" hidden>
+      <div class="card hero" style="--c: var(--pist)">
+        <div class="head"><span class="pill" id="iTitle">Invoice</span><div id="kindTog"></div></div>
+        <div class="hero-body">
+          <div class="lines" id="iLines"></div>
+          <div class="fig range" id="iFig"></div>
+        </div>
+      </div>
+      <div class="stages" id="actuals"></div>
+      <div class="grid2">
+        <div class="card glass"><div class="head"><span class="pill">Bill to</span></div>
+          <textarea class="list" id="clientAddress" rows="4" placeholder="Client address" aria-label="Client address"></textarea>
+          <input class="line-in" id="poRef" placeholder="PO number, if they gave one" aria-label="PO number" autocomplete="off">
+        </div>
+        <div class="card glass"><div class="head"><span class="pill">On the invoice</span></div><div id="iRows"></div></div>
+      </div>
+      <div class="action">
+        <h2>Invoice it</h2>
+        <div class="btns"><button type="button" class="btn primary" id="issueBtn">Make the PDF</button></div>
+      </div>
+      <div class="rows" id="invRows"></div>
+      <details class="card glass settings" id="settingsBox">
+        <summary><span class="pill">Your details</span></summary>
+        <div class="set-grid" id="settingsForm">
+          <label>Your name<input name="name" autocomplete="off"></label>
+          <label>Trading as<input name="tradingName" autocomplete="off"></label>
+          <label class="wide">Address<textarea name="address" rows="3"></textarea></label>
+          <label>Email<input name="email" type="email" autocomplete="off"></label>
+          <label>Days to pay<input name="termsDays" type="number" min="0" max="120" inputmode="numeric"></label>
+          <label>Account name<input name="accountName" autocomplete="off"></label>
+          <label>Sort code<input name="sortCode" autocomplete="off" inputmode="numeric"></label>
+          <label>Account number<input name="accountNumber" autocomplete="off" inputmode="numeric"></label>
+          <label>Next invoice number<input name="nextNumber" type="number" min="1" inputmode="numeric"></label>
+        </div>
+        <div class="btns"><button type="button" class="btn primary" id="settingsSave">Save details</button></div>
+      </details>
     </section>
 
     <!-- SAVED -->

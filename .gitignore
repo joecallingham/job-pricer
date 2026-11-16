@@ -4,3 +4,5 @@ quotes/
 public/fonts/
 .DS_Store
 server.log
+settings.json
+invoices/

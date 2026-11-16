@@ -2,6 +2,7 @@
 // quote object and draws it.
 import { compute, newQuote, emptyAddons, quoteText, rowLabel, highDays, toHalf, RULES, money, range, dayText } from '/src/pricing.js';
 import { setProduct, ensureKickoff, productLabel } from '/src/catalogue.js';
+import { invoiceLines, KIND_TITLE, longDate } from '/src/invoice.js';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => {
@@ -15,7 +16,7 @@ const el = (tag, attrs = {}, ...kids) => {
   return n;
 };
 
-const VIEWS = ['brief', 'tasks', 'quote', 'saved'];
+const VIEWS = ['brief', 'tasks', 'quote', 'invoice', 'saved'];
 let q = newQuote();
 let claudeOn = false;
 let cat = { groups: [], products: [], kickoff: {} };   // filled from /api/catalogue at start
@@ -39,6 +40,7 @@ function show(view) {
   if (view === 'quote') drawQuote();
   if (view === 'saved') drawSaved();
   if (view === 'tasks') drawTasks();
+  if (view === 'invoice') openInvoice();
   history.replaceState(null, '', `#${view}`);
   scrollTo({ top: 0 });
 }
@@ -276,6 +278,124 @@ $('copyBtn').addEventListener('click', async () => {
   catch { say('Copy blocked by the browser'); }
 });
 $('saveBtn').addEventListener('click', () => save(true));
+
+/* ---------- invoice ---------- */
+// The invoice is priced from each task's actualDays (stored on the quote) and is
+// frozen by the server when the PDF is made. Monthly figures are billed separately.
+let invoices = [];
+let invKind = 'full', depPct = 50;
+const KIND_OPTS = [{ label: 'Full', value: 'full' }, { label: 'Deposit', value: 'deposit' }, { label: 'Final', value: 'final' }];
+const quoteDeposits = () => invoices.filter(i => i.quoteId === q.id && i.kind === 'deposit').sort((a, b) => a.number - b.number);
+const actualOf = t => (t.actualDays != null ? toHalf(t.actualDays) : toHalf(t.lowDays));
+
+async function openInvoice() {
+  try { invoices = await (await fetch('/api/invoices')).json(); } catch { invoices = []; }
+  // A quote with a deposit already invoiced opens on Final; otherwise Final would just be Full.
+  invKind = quoteDeposits().length ? (invKind === 'deposit' ? 'deposit' : 'final') : (invKind === 'final' ? 'full' : invKind);
+  $('clientAddress').value = q.clientAddress || '';
+  $('poRef').value = q.poRef || '';
+  drawInvoice(); drawInvoiceList(); loadSettings();
+}
+
+function drawInvoice() {
+  $('iTitle').textContent = q.project || 'Invoice';
+  $('kindTog').replaceChildren(toggle(KIND_OPTS, invKind, v => { invKind = v; drawInvoice(); }, 'Invoice type', 'var(--pist)'));
+  const box = $('actuals');
+  if (!q.tasks.length) {
+    box.replaceChildren(el('p', { class: 'empty' }, 'Open a quote from Saved, or build one in Job'));
+  } else if (invKind === 'deposit') {
+    box.replaceChildren(el('div', { class: 'opt' }, el('span', {}, 'Deposit, % of the quoted low total'),
+      stepper(depPct, v => { depPct = v; drawInvoiceFigures(); }, 'deposit percent', { step: 5, min: 5, max: 100, fmt: v => `${v}%` })));
+  } else {
+    const nm = names();
+    const groups = [...q.products.map(p => ({ id: p.id, label: nm[p.id] })), { id: '', label: 'Kick-off and other work' }];
+    box.replaceChildren(el('div', { class: 'stage' }, el('div', { class: 'head' }, el('span', { class: 'pill' }, 'Days actually worked')),
+      groups.flatMap(g => {
+        const ts = q.tasks.filter(t => (g.id ? t.product === g.id : !owned(t)));
+        if (!ts.length) return [];
+        return [el('p', { class: 'grp' }, g.label), ...ts.map(t => el('div', { class: 'task' },
+          el('span', { class: 'name' }, t.name || 'Task'),
+          stepper(actualOf(t), v => { t.actualDays = v; changed(); drawInvoiceFigures(); }, `days on ${t.name || 'task'}`, { step: 0.5, min: 0.5, fmt: v => v.toFixed(1) }),
+          el('span', { class: 'was' }, `quoted ${toHalf(t.lowDays).toFixed(1)}`)))];
+      })));
+  }
+  drawInvoiceFigures();
+}
+
+function previewInvoice() {
+  return invoiceLines(q, names(), { kind: invKind, depositPct: depPct, deposits: quoteDeposits() });
+}
+function drawInvoiceFigures() {
+  const inv = previewInvoice();
+  const c = compute(q);
+  $('iFig').replaceChildren(el('div', {}, money(inv.total), el('small', {}, KIND_TITLE[invKind])));
+  const lv = (a, b) => el('div', { class: 'line' }, el('div', { class: 'lv' }, el('span', {}, a), el('span', {}, b)));
+  $('iLines').replaceChildren(...[
+    lv('Quoted', range(c.low, c.high)),
+    invKind !== 'deposit' ? lv('Worked', dayText(+inv.days.toFixed(1))) : null,
+    quoteDeposits().length ? lv('Deposits', quoteDeposits().map(d => d.id).join(', ')) : null,
+    c.monthly ? lv('Monthly', 'Billed separately') : null,
+  ].filter(Boolean));
+  $('iRows').replaceChildren(
+    ...inv.lines.map(l => el('div', { class: 'row' }, el('span', { class: 'n' }, l.label, l.detail ? el('small', {}, l.detail) : null), el('span', { class: 'v' }, money(l.amount)))),
+    ...(inv.less.length ? [el('div', { class: 'row' }, el('span', { class: 'n' }, 'Subtotal'), el('span', { class: 'v' }, money(inv.subtotal))),
+      ...inv.less.map(l => el('div', { class: 'row' }, el('span', { class: 'n' }, l.label), el('span', { class: 'v' }, `−${money(l.amount)}`)))] : []),
+    el('div', { class: 'row total' }, el('span', { class: 'n' }, 'Total due'), el('span', { class: 'v' }, money(inv.total))));
+}
+
+$('clientAddress').addEventListener('input', e => { q.clientAddress = e.target.value; changed(); });
+$('poRef').addEventListener('input', e => { q.poRef = e.target.value; changed(); });
+
+$('issueBtn').addEventListener('click', async () => {
+  if (!q.tasks.length) { say('No quote open'); return; }
+  const inv = previewInvoice();
+  if (!confirm(`Make ${KIND_TITLE[invKind].toLowerCase()} for ${money(inv.total)}? It takes the next invoice number and can't be edited after.`)) return;
+  const btn = $('issueBtn'); btn.disabled = true; say('Making the PDF', true);
+  try {
+    await save();
+    const r = await fetch('/api/invoices', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ quoteId: q.id, kind: invKind, depositPct: depPct }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    say(`${d.id} made`);
+    if (invKind === 'deposit') invKind = 'final';
+    await openInvoice();
+    location.href = `/api/invoices/${d.id}/pdf`;
+  } catch (e) { say(e.message || 'That failed'); if (/details/i.test(e.message)) $('settingsBox').open = true; }
+  finally { btn.disabled = false; }
+});
+
+function drawInvoiceList() {
+  const today = new Date().toLocaleDateString('en-CA');
+  $('invRows').replaceChildren(...(invoices.length ? [el('span', { class: 'pill' }, 'Invoices'), ...invoices.map(i => {
+    const overdue = i.status !== 'paid' && i.dueAt < today;
+    const label = i.status === 'paid' ? 'Paid' : overdue ? 'Overdue' : 'Unpaid';
+    return el('div', { class: 'row inv-row' },
+      el('span', { class: 'n' }, `${i.id} · ${[i.project, i.client].filter(Boolean).join(', ') || 'Untitled'}`, el('small', {}, `${KIND_TITLE[i.kind]}, ${i.status === 'paid' ? 'paid' : `due ${longDate(i.dueAt)}`}`)),
+      el('button', { type: 'button', class: `chip ${overdue ? 'overdue' : i.status}`, 'aria-label': `${label}. Mark ${i.status === 'paid' ? 'unpaid' : 'paid'}`,
+        onclick: async () => { await fetch(`/api/invoices/${i.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: i.status === 'paid' ? 'unpaid' : 'paid' }) }); await openInvoice(); } }, label),
+      el('span', { class: 'v' }, money(i.total)),
+      el('a', { class: 'btn', href: `/api/invoices/${i.id}/pdf` }, 'PDF'));
+  })] : []));
+}
+
+const SETTING_NAMES = ['name', 'tradingName', 'address', 'email', 'termsDays', 'accountName', 'sortCode', 'accountNumber', 'nextNumber'];
+async function loadSettings() {
+  try {
+    const s = await (await fetch('/api/settings')).json();
+    const form = $('settingsForm');
+    for (const k of SETTING_NAMES) { const f = form.querySelector(`[name="${k}"]`); if (f && document.activeElement !== f) f.value = s[k] ?? ''; }
+    if (!s.name) $('settingsBox').open = true;
+  } catch {}
+}
+$('settingsSave').addEventListener('click', async () => {
+  const form = $('settingsForm');
+  const s = Object.fromEntries(SETTING_NAMES.map(k => [k, form.querySelector(`[name="${k}"]`).value]));
+  try {
+    const r = await fetch('/api/settings', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(s) });
+    if (!r.ok) throw new Error();
+    say('Details saved'); loadSettings();
+  } catch { say('Details not saved'); }
+});
 
 /* ---------- saved ---------- */
 async function drawSaved() {

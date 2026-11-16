@@ -1,7 +1,7 @@
 // Job Pricer local server. Binds to 127.0.0.1 only: quotes hold client details
 // and the Nuckle desktop licence rules out serving the fonts publicly.
 import { createServer } from 'node:http';
-import { readFile, writeFile, readdir, mkdir, rename } from 'node:fs/promises';
+import { readFile, writeFile, readdir, mkdir, rename, stat } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,12 +9,80 @@ const ROOT = fileURLToPath(new URL('.', import.meta.url));
 try { process.loadEnvFile(join(ROOT, '.env')); } catch { /* no .env yet: parsing stays off */ }
 
 const { parseBrief, hasKey, ParseError, MODEL } = await import('./src/parse.mjs');
+import { invoiceLines, addDays, invoiceId, INVOICE_ID, KINDS } from './src/invoice.js';
+import { invoiceHtml, printPdf, loadLogo } from './src/invoice-pdf.mjs';
+import { productLabel } from './src/catalogue.js';
 
 const PORT = Number(process.env.PORT) || 4350;
 const HOST = '127.0.0.1';
 const QUOTES = join(ROOT, 'quotes');
+const INVOICES = join(ROOT, 'invoices');      // gitignored: client details and bank details
+const SETTINGS = join(ROOT, 'settings.json');  // gitignored: Joe's business and bank details
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 const ID = /^q-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9]{3,12}$/;
+await loadLogo(ROOT);
+
+const writeJson = async (file, data) => { const tmp = `${file}.tmp`; await writeFile(tmp, JSON.stringify(data, null, 2)); await rename(tmp, file); };
+const readJson = async (file, fallback) => { try { return JSON.parse(await readFile(file, 'utf8')); } catch { return fallback; } };
+
+/* ---------- settings (business details for invoices) ---------- */
+const SETTING_TEXT = ['name', 'tradingName', 'address', 'email', 'accountName', 'sortCode', 'accountNumber'];
+const DEFAULT_SETTINGS = { name: '', tradingName: 'Average Joe', address: '', email: '', accountName: '', sortCode: '', accountNumber: '', termsDays: 14, nextNumber: 1 };
+const getSettings = async () => ({ ...DEFAULT_SETTINGS, ...(await readJson(SETTINGS, {})) });
+function cleanSettings(s, prev) {
+  const out = { ...prev };
+  for (const k of SETTING_TEXT) if (k in s) out[k] = String(s[k] ?? '').slice(0, 400);
+  if ('termsDays' in s) out.termsDays = Math.min(120, Math.max(0, Math.round(Number(s.termsDays) || 0)));
+  if ('nextNumber' in s) out.nextNumber = Math.min(999999, Math.max(1, Math.round(Number(s.nextNumber) || 1)));
+  return out;
+}
+
+/* ---------- invoices ---------- */
+async function listInvoices() {
+  await mkdir(INVOICES, { recursive: true });
+  const out = [];
+  for (const f of (await readdir(INVOICES)).filter(f => f.endsWith('.json'))) {
+    const inv = await readJson(join(INVOICES, f), null);
+    if (inv) out.push({ id: inv.id, number: inv.number, kind: inv.kind, quoteId: inv.quoteId, client: inv.to?.client, project: inv.project, issuedAt: inv.issuedAt, dueAt: inv.dueAt, status: inv.status, total: inv.total });
+  }
+  return out.sort((a, b) => b.number - a.number);
+}
+
+async function issueInvoice({ quoteId, kind, depositPct }) {
+  if (!ID.test(String(quoteId))) throw new ParseError('Bad quote id', 400);
+  if (!KINDS.includes(kind)) throw new ParseError('Bad invoice type', 400);
+  const q = await readJson(join(QUOTES, `${quoteId}.json`), null);
+  if (!q) throw new ParseError('Save the quote first', 404);
+  const settings = await getSettings();
+  if (!settings.name.trim()) throw new ParseError('Add your name in Your details first', 400);
+  const cat = await readJson(join(ROOT, 'data', 'catalogue.json'), { products: [] });
+  const names = Object.fromEntries((q.products || []).map(p => [p.id, productLabel(cat, p.id, p.size)]));
+  const all = await listInvoices();
+  const deposits = all.filter(i => i.quoteId === quoteId && i.kind === 'deposit').sort((a, b) => a.number - b.number);
+  const body = invoiceLines(q, names, { kind, depositPct, deposits });
+  if (body.total <= 0) throw new ParseError('Nothing left to invoice', 400);
+
+  // Next free number: never reuse one, even if settings were set back by hand.
+  let n = settings.nextNumber;
+  while (all.some(i => i.number === n)) n++;
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+  const inv = {
+    version: 1, id: invoiceId(n), number: n, kind, quoteId, status: 'unpaid', paidAt: null,
+    issuedAt: today, dueAt: addDays(today, settings.termsDays),
+    from: { name: settings.name, tradingName: settings.tradingName, address: settings.address, email: settings.email },
+    to: { client: q.client || '', address: q.clientAddress || '' },
+    project: q.project || '', poRef: q.poRef || '',
+    payment: { accountName: settings.accountName, sortCode: settings.sortCode, accountNumber: settings.accountNumber, termsDays: settings.termsDays },
+    ...body,
+  };
+  await mkdir(INVOICES, { recursive: true });
+  await writeJson(join(INVOICES, `${inv.id}.json`), inv);
+  await writeJson(SETTINGS, { ...settings, nextNumber: n + 1 });
+  await renderPdf(inv.id);
+  return inv;
+}
+
+const renderPdf = id => printPdf(`http://${HOST}:${PORT}/api/invoices/${id}/html`, join(INVOICES, `${id}.pdf`));
 
 const send = (res, status, body, type = 'application/json') => {
   res.writeHead(status, { 'content-type': type, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
@@ -29,10 +97,10 @@ async function body(req, limit = 2_000_000) {
 
 async function staticFile(res, urlPath) {
   const map = urlPath === '/' ? '/public/index.html'
-    : ['/src/pricing.js', '/src/catalogue.js'].includes(urlPath) ? urlPath
+    : ['/src/pricing.js', '/src/catalogue.js', '/src/invoice.js'].includes(urlPath) ? urlPath
     : `/public${urlPath}`;
   const file = normalize(join(ROOT, map));
-  if (!file.startsWith(join(ROOT, 'public')) && ![join(ROOT, 'src', 'pricing.js'), join(ROOT, 'src', 'catalogue.js')].includes(file)) return send(res, 404, { error: 'Not found' });
+  if (!file.startsWith(join(ROOT, 'public')) && ![join(ROOT, 'src', 'pricing.js'), join(ROOT, 'src', 'catalogue.js'), join(ROOT, 'src', 'invoice.js')].includes(file)) return send(res, 404, { error: 'Not found' });
   try { send(res, 200, await readFile(file), TYPES[extname(file)] || 'application/octet-stream'); }
   catch { send(res, 404, { error: 'Not found' }); }
 }
@@ -88,6 +156,42 @@ const server = createServer(async (req, res) => {
         const tmp = `${file}.tmp`;
         await writeFile(tmp, JSON.stringify(q, null, 2));
         await rename(tmp, file);              // atomic: a crash never leaves half a quote
+        return send(res, 200, { ok: true });
+      }
+    }
+
+    if (p === '/api/settings') {
+      if (req.method === 'GET') return send(res, 200, await getSettings());
+      if (req.method === 'PUT') { const s = cleanSettings(await body(req), await getSettings()); await writeJson(SETTINGS, s); return send(res, 200, s); }
+    }
+
+    if (p === '/api/invoices') {
+      if (req.method === 'GET') return send(res, 200, await listInvoices());
+      if (req.method === 'POST') { const inv = await issueInvoice(await body(req)); return send(res, 200, { id: inv.id, total: inv.total }); }
+    }
+
+    const iv = p.match(/^\/api\/invoices\/([^/]+)(\/html|\/pdf)?$/);
+    if (iv) {
+      const [, id, part] = iv;
+      if (!INVOICE_ID.test(id)) return send(res, 400, { error: 'Bad id' });
+      const file = join(INVOICES, `${id}.json`);
+      const inv = await readJson(file, null);
+      if (!inv) return send(res, 404, { error: 'Not found' });
+      if (req.method === 'GET' && part === '/html') return send(res, 200, invoiceHtml(inv), 'text/html; charset=utf-8');
+      if (req.method === 'GET' && part === '/pdf') {
+        const pdf = join(INVOICES, `${id}.pdf`);
+        try { await stat(pdf); } catch { await renderPdf(id); }
+        const name = `${id} ${inv.to?.client || ''}`.trim().replace(/[^A-Za-z0-9 ._-]/g, '');
+        res.writeHead(200, { 'content-type': 'application/pdf', 'content-disposition': `attachment; filename="${name}.pdf"`, 'cache-control': 'no-store' });
+        return res.end(await readFile(pdf));
+      }
+      if (req.method === 'GET' && !part) return send(res, 200, inv);
+      if (req.method === 'PUT' && !part) {   // only the status changes after issue; the rest is a frozen record
+        const { status } = await body(req);
+        if (!['unpaid', 'paid'].includes(status)) return send(res, 400, { error: 'Bad status' });
+        inv.status = status; inv.paidAt = status === 'paid' ? new Date().toISOString().slice(0, 10) : null;
+        await writeJson(file, inv);
+        await renderPdf(id);
         return send(res, 200, { ok: true });
       }
     }
