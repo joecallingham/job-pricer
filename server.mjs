@@ -4,6 +4,8 @@ import { createServer } from 'node:http';
 import { readFile, writeFile, readdir, mkdir, rename, stat } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { homedir } from 'node:os';
+import { readdirSync, existsSync, mkdirSync, cpSync } from 'node:fs';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 try { process.loadEnvFile(join(ROOT, '.env')); } catch { /* no .env yet: parsing stays off */ }
@@ -15,12 +17,38 @@ import { productLabel } from './src/catalogue.js';
 
 const PORT = Number(process.env.PORT) || 4350;
 const HOST = '127.0.0.1';
-const QUOTES = join(ROOT, 'quotes');
-const INVOICES = join(ROOT, 'invoices');      // gitignored: client details and bank details
-const SETTINGS = join(ROOT, 'settings.json');  // gitignored: Joe's business and bank details
+// Quotes, invoices and settings live in Google Drive (My Drive/06_Claude_Work/Job Pricer) on any
+// Mac with Drive, so every Mac shares the same jobs. Without Drive they stay in this folder.
+const DATA = dataDir();
+const QUOTES = join(DATA, 'quotes');
+const INVOICES = join(DATA, 'invoices');      // client details and bank details: never in git
+const SETTINGS = join(DATA, 'settings.json');  // Joe's business and bank details: never in git
+adoptLocalData();
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 const ID = /^q-[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9]{3,12}$/;
 await loadLogo(ROOT);
+
+function dataDir() {
+  if (process.env.DATA_DIR) return process.env.DATA_DIR;
+  const cloud = join(homedir(), 'Library', 'CloudStorage');
+  let drives = [];
+  try { drives = readdirSync(cloud).filter(d => d.startsWith('GoogleDrive-')).sort(); } catch { /* no Drive */ }
+  // the account that already has the folder, else the one with Joe's 06_Claude_Work (not a work Drive)
+  const work = d => join(cloud, d, 'My Drive', '06_Claude_Work');
+  const pick = drives.find(d => existsSync(join(work(d), 'Job Pricer'))) || drives.find(d => existsSync(work(d)));
+  return pick ? join(work(pick), 'Job Pricer') : ROOT;
+}
+
+// Anything this Mac saved locally before (quotes/, invoices/, settings.json) is copied into the
+// shared folder once, never over a file already there. The local copies are left as they are.
+function adoptLocalData() {
+  mkdirSync(DATA, { recursive: true });
+  if (DATA === ROOT) return;
+  for (const name of ['quotes', 'invoices', 'settings.json']) {
+    const from = join(ROOT, name);
+    if (existsSync(from)) cpSync(from, join(DATA, name), { recursive: true, force: false, errorOnExist: false });
+  }
+}
 
 const writeJson = async (file, data) => { const tmp = `${file}.tmp`; await writeFile(tmp, JSON.stringify(data, null, 2)); await rename(tmp, file); };
 const readJson = async (file, fallback) => { try { return JSON.parse(await readFile(file, 'utf8')); } catch { return fallback; } };
@@ -206,5 +234,6 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
+  console.log(`Job Pricer data: ${DATA}`);
   console.log(`Job Pricer on http://${HOST}:${PORT}  (Claude parsing ${hasKey() ? 'on' : 'off: no ANTHROPIC_API_KEY in .env'})`);
 });

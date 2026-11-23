@@ -1,27 +1,31 @@
 # Job Pricer
 
-Joe's freelance quoting tool. Paste a brief, get a task list in half days, edit it, and send a price range with an itemised breakdown. Runs on the Mac mini; installs as an app on the laptop and the phone.
+Joe's freelance quoting tool. Paste a brief, get a task list in half days, edit it, and send a price range with an itemised breakdown. Runs on each of Joe's Macs, all sharing the same jobs through Google Drive.
 
 ## Run it
 
     npm install
-    npm run fonts      # copies Nuckle from ~/Projects/sumo-joe-studio (gitignored: desktop licence)
+    npm run fonts      # copies Nuckle from the Drive folder below (gitignored: desktop licence)
     cp .env.example .env   # then add ANTHROPIC_API_KEY to switch on "Price the brief"
     npm start          # http://127.0.0.1:4350
     npm test           # the pricing maths, hand-worked cases
 
 Without a key everything works except reading a brief: use "Start blank" and type the tasks.
 
-## On the phone and laptop
+## On every Mac (GitHub for the code, Google Drive for the jobs)
 
-The server only listens on the Mac mini itself. To reach it from other devices without putting it on the internet, use Tailscale (free personal plan):
+The code comes from this repo; quotes, invoices and settings live in Google Drive at
+`My Drive/06_Claude_Work/Job Pricer` (Joe's own Drive, the one with 06_Claude_Work, not a work Drive).
+The server finds that folder by itself; set `DATA_DIR` to use another. Without Drive, data stays in this folder.
 
-1. Install Tailscale on the Mac mini, the laptop and the iPhone, signed in to the same account.
-2. On the Mac mini: `tailscale serve --bg 4350`. It prints an https address like `https://mac-mini.<tailnet>.ts.net`.
-3. iPhone: open that address in Safari → Share → Add to Home Screen. Laptop: open it in Chrome → Install.
-4. Keep the server running: install `scripts/com.sumojoe.jobpricer.plist` as a login item (instructions inside the file).
+- On the MacBook, Avg Notch runs the Pricer in its Pricer tab: it pulls this repo and starts the server when the tab opens.
+- Another Mac: clone to ~/Projects/job-pricer, `npm install`, `npm run fonts`, then `npm start` or the login item below.
+- A Mac that saved quotes locally before copies them into Drive the first time it starts (never over a file already there; the local copies stay).
+- Keep a server running at login: `scripts/com.sumojoe.jobpricer.plist` (instructions inside the file).
+- After pulling new code on the Mac mini: `launchctl kickstart -k gui/$(id -u)/com.sumojoe.jobpricer`.
 
-Quotes stay on the Mac mini (`quotes/`, gitignored). Offline, the app opens but cannot load or save quotes.
+Two Macs editing the same quote at the same moment: the last save wins. The phone isn't supported (Joe, 23 Nov).
+The server only listens on the Mac it runs on, so nothing is on the internet.
 
 ## Pricing decisions
 

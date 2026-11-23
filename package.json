@@ -6,7 +6,7 @@
   "description": "Joe's freelance quoting tool. Runs locally on the Mac mini.",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test test/",
+    "test": "node --test test/*.test.mjs",
     "fonts": "node scripts/fonts.mjs"
   },
   "engines": {
