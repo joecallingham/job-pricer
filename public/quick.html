@@ -5,59 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quick quote</title>
 <style>
-/* Quick quote: the Pricer in the MacBook notch (about 630 x 260). Describe a job, see a rough price. */
+/* Quick quote: the Pricer in the MacBook notch. Plain, like avgjoe.studio: white Nuckle on black,
+   grey for the rest, hairlines, no boxes or pills. */
 @font-face { font-family: "Nuckle"; src: url("/fonts/Nuckle-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "Nuckle"; src: url("/fonts/Nuckle-Semibold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-:root {
-  --ink: #111; --ink-2: rgba(17,17,17,.62); --grey: rgba(255,255,255,.5); --mint: #DCE5D8; --line: rgba(255,255,255,.16);
-  --font: "Nuckle", "Helvetica Neue", Helvetica, Arial, sans-serif; color-scheme: dark;
-}
+:root { --grey: rgba(255,255,255,.45); --soft: rgba(255,255,255,.7); --line: rgba(255,255,255,.12);
+  --font: "Nuckle", "Helvetica Neue", Helvetica, Arial, sans-serif; color-scheme: dark; }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; background: #000; color: #fff; font-family: var(--font); font-weight: 500; font-size: 13px; line-height: 1.4; letter-spacing: -.01em; -webkit-font-smoothing: antialiased; overflow: hidden; }
-.quick { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 8px; height: 100%; }
+html, body { height: 100%; margin: 0; background: #000; color: #fff; font-family: var(--font); font-weight: 500; font-size: 12.5px; line-height: 1.45; letter-spacing: -.01em; -webkit-font-smoothing: antialiased; overflow: hidden; }
+.quick { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); height: 100%; }
 
 /* left: what the job is */
-.ask { display: flex; flex-direction: column; min-height: 0; border-radius: 16px; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px var(--line); padding: 12px 14px 10px; }
-.ask.drop { box-shadow: inset 0 0 0 1.5px #fff; background: rgba(255,255,255,.12); }
-textarea { flex: 1; min-height: 0; width: 100%; resize: none; border: 0; background: none; color: #fff; font: inherit; font-size: 13.5px; line-height: 1.45; padding: 0; outline: none; }
-textarea::placeholder { color: rgba(255,255,255,.38); }
-.foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 11px; color: var(--grey); min-height: 22px; }
-#hint { min-width: 0; flex: 1; }
-.doc { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; height: 22px; padding: 0 4px 0 10px; border-radius: 999px; background: #fff; color: #000; }
+.ask { display: flex; flex-direction: column; min-height: 0; padding-right: 16px; }
+.ask.drop textarea::placeholder { color: #fff; }
+textarea { flex: 1; min-height: 0; width: 100%; resize: none; border: 0; background: none; color: #fff; font: inherit; font-size: 13px; line-height: 1.5; padding: 0; outline: none; }
+textarea::placeholder { color: var(--grey); }
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 6px; font-size: 11.5px; color: var(--grey); min-height: 22px; }
+#hint { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; color: var(--soft); }
 .doc span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.doc button { width: 18px; height: 18px; border: 0; border-radius: 50%; background: rgba(0,0,0,.1); color: #000; font: inherit; font-size: 12px; line-height: 1; cursor: pointer; padding: 0; }
-.clear { border: 0; background: none; color: var(--grey); font: inherit; font-size: 11px; cursor: pointer; padding: 0; }
-.clear:hover { color: #fff; }
+.doc button, .clear { border: 0; background: none; color: var(--grey); font: inherit; font-size: 11.5px; cursor: pointer; padding: 0; }
+.doc button:hover, .clear:hover { color: #fff; }
 
 /* right: the rough price */
-.price { display: flex; flex-direction: column; min-height: 0; border-radius: 16px; padding: 12px 14px; color: var(--ink);
-  background: linear-gradient(165deg, color-mix(in oklab, var(--mint) 92%, white) 0%, var(--mint) 55%, color-mix(in oklab, var(--mint) 94%, black) 100%); }
-.label { font-size: 11px; color: var(--ink-2); }
-.fig { font-size: 30px; line-height: 1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; margin-top: 4px; white-space: nowrap; }
-.days { font-size: 11px; color: var(--ink-2); margin-top: 4px; }
-.lines { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 3px; min-height: 0; overflow: hidden; }
-.lines li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: baseline; font-size: 12px; }
+.price { display: flex; flex-direction: column; min-height: 0; padding-left: 16px; box-shadow: inset 1px 0 0 var(--line); }
+.label { font-size: 11.5px; color: var(--grey); }
+.fig { font-size: 26px; line-height: 1.05; letter-spacing: -.04em; font-variant-numeric: tabular-nums; margin-top: 2px; white-space: nowrap; }
+.days { font-size: 11.5px; color: var(--grey); margin-top: 2px; }
+.lines { list-style: none; margin: 10px 0 0; padding: 0; display: grid; min-height: 0; overflow: hidden; }
+.lines li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 4px 0; font-size: 12px; color: var(--soft); box-shadow: inset 0 -1px 0 var(--line); }
 .lines li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lines li span:last-child { font-variant-numeric: tabular-nums; color: var(--ink-2); }
-.lines li.more { color: var(--ink-2); grid-template-columns: 1fr; }
-.empty { margin: 10px 0 0; font-size: 12px; color: var(--ink-2); }
-.go { margin-top: auto; padding-top: 8px; display: flex; justify-content: flex-end; }
-.btn { height: 30px; padding: 0 14px; border-radius: 999px; border: 0; background: #111; color: #fff; font: inherit; font-size: 12.5px; cursor: pointer; transition: opacity .15s; }
-.btn:disabled { opacity: .35; cursor: default; }
-.btn:focus-visible, .clear:focus-visible, .doc button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.price .btn:focus-visible { outline-color: #111; }
-/* Half the notch (about 310 wide): the description on top, the price under it. */
-@media (max-width: 480px) {
-  .quick { grid-template-columns: minmax(0, 1fr); grid-template-rows: 96px minmax(0, 1fr); }
-  .ask { padding: 9px 12px 7px; border-radius: 14px; }
-  textarea { font-size: 12.5px; }
-  .foot { margin-top: 4px; min-height: 20px; }
-  .price { padding: 10px 12px; border-radius: 14px; }
-  .fig { font-size: 26px; }
-  .lines { margin-top: 6px; gap: 2px; }
-  .lines li { font-size: 11.5px; }
-  .go { padding-top: 6px; }
-}
+.lines li span:last-child { font-variant-numeric: tabular-nums; color: var(--grey); }
+.lines li.more { color: var(--grey); grid-template-columns: 1fr; box-shadow: none; }
+.go { margin-top: auto; padding-top: 6px; display: flex; justify-content: flex-end; }
+.btn { border: 0; background: none; color: #fff; font: inherit; font-size: 13px; padding: 4px 0; cursor: pointer; }
+.btn:not(:disabled)::after { content: " ↘"; }
+.btn:disabled { color: var(--grey); cursor: default; }
+:focus-visible { outline: 1px solid #fff; outline-offset: 3px; }
 </style>
 </head>
 <body>

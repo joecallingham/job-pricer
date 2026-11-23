@@ -75,6 +75,7 @@ function showDoc() {
   const name = document.createElement('span'); name.textContent = docName;
   const x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Forget the document');
   x.addEventListener('click', () => { docName = ''; showDoc(); changed(); });
+  x.title = 'Forget the document';
   chip.append(name, x);
   hint.replaceChildren(chip);
 }
