@@ -5,7 +5,7 @@ import { readFile, writeFile, readdir, mkdir, rename, stat } from 'node:fs/promi
 import { join, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
-import { readdirSync, existsSync, mkdirSync, cpSync } from 'node:fs';
+import { readdirSync, existsSync, mkdirSync, cpSync, readFileSync } from 'node:fs';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 try { process.loadEnvFile(join(ROOT, '.env')); } catch { /* no .env yet: parsing stays off */ }
@@ -16,6 +16,17 @@ import { invoiceHtml, printPdf, loadLogo } from './src/invoice-pdf.mjs';
 import { productLabel } from './src/catalogue.js';
 
 const PORT = Number(process.env.PORT) || 4350;
+// The commit this server is running, so Avg Notch can restart it after pulling newer code.
+const CODE = (() => {
+  try {
+    const head = readFileSync(join(ROOT, '.git', 'HEAD'), 'utf8').trim();
+    if (!head.startsWith('ref: ')) return head;
+    const ref = head.slice(5);
+    if (existsSync(join(ROOT, '.git', ref))) return readFileSync(join(ROOT, '.git', ref), 'utf8').trim();
+    const packed = readFileSync(join(ROOT, '.git', 'packed-refs'), 'utf8').split('\n').find(l => l.endsWith(` ${ref}`));
+    return packed ? packed.split(' ')[0] : '';
+  } catch { return ''; }
+})();
 const HOST = '127.0.0.1';
 // Quotes, invoices and settings live in Google Drive (My Drive/06_Claude_Work/Job Pricer) on any
 // Mac with Drive, so every Mac shares the same jobs. Without Drive they stay in this folder.
@@ -159,7 +170,7 @@ const server = createServer(async (req, res) => {
       if (!ok) return send(res, 403, { error: 'Forbidden' });
     }
 
-    if (p === '/api/status' && req.method === 'GET') return send(res, 200, { claude: hasKey(), model: MODEL });
+    if (p === '/api/status' && req.method === 'GET') return send(res, 200, { claude: hasKey(), model: MODEL, code: CODE, pid: process.pid });
 
     if (p === '/api/parse' && req.method === 'POST') {
       const { brief } = await body(req);
