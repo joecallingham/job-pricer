@@ -208,6 +208,63 @@ textarea.list { font-size: var(--t6); line-height: 1.5; letter-spacing: -.02em; 
   .task input.name { grid-column: 1 / -1; }
   .card { padding: 24px 16px; }
 }
+/* ===================== In the notch (?notch) =====================
+   Avg Notch shows the Pricer in a ~630x260 window inside the MacBook notch: no frame, no logo or
+   arrow, no notch of its own, smaller type and tighter spacing. Messages show as a small pill. */
+html.notch {
+  --bz: 8px; --r: 14px; --rc: 16px; --fpad: 14px; --card-pad: 14px 16px; --after-head: 10px; --pill-h: 28px; --sec: 10px;
+  --t1: 44px; --t2: 30px; --t3: 22px; --t4: 18px; --t5: 15px; --t6: 13px; --t7: 13px; --t8: 11px; --t9: 10px;
+}
+html.notch body { font-size: 13px; line-height: 1.4; }
+html.notch :is(.bezel, .notch-arrow, .arrow, .island .lock, .topnotch .progress) { display: none !important; }
+html.notch .page { gap: 8px; padding: 0 2px 12px; }
+html.notch .topnotch { justify-self: stretch; width: auto; max-width: none; margin: 0; padding: 0 0 6px; border-radius: 0; }
+html.notch .topnotch::before, html.notch .topnotch::after { display: none; }
+html.notch .tabs button { padding: 0 12px; font-size: 13px; }
+html.notch .island { left: auto; right: 10px; bottom: 10px; translate: none; width: auto; height: 26px; padding: 0 12px; border-radius: 999px; background: #fff; color: #000; display: grid; place-items: center; opacity: 0; transition: opacity .2s var(--ease); }
+html.notch .island::before, html.notch .island::after { display: none; }
+html.notch .island > span { position: static; translate: none; }
+html.notch .island .msg { font-size: 12px; opacity: 1; }
+html.notch .island.say { opacity: 1; }
+html.notch .view { gap: 8px; }
+html.notch .card { gap: 6px; }
+html.notch .card .head { gap: 10px; }
+html.notch .pill, html.notch .btn { padding: 0 12px; }
+html.notch .btn { gap: 6px; }
+/* Brief: client, project and deadline side by side, a shorter brief box */
+html.notch #view-brief { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html.notch #view-brief > :not(.inrow) { grid-column: 1 / -1; }
+html.notch .inrow { padding: 8px 4px 8px var(--fpad); }
+html.notch .inrow input { font-size: 18px; line-height: 1.2; letter-spacing: -.03em; }
+html.notch .inrow label { top: -2px; font-size: 10px; }
+html.notch .brief-card .head { display: none; }
+html.notch .brief-card .head + * { margin-top: 0; }
+html.notch #brief { min-height: 5em; height: 5em; font-size: 13px; }
+html.notch textarea.list { min-height: 4em; font-size: 13px; }
+html.notch .action { padding: 8px var(--fpad); }
+html.notch .action h2 { font-size: 20px; line-height: 1; letter-spacing: -.04em; }
+html.notch .btns { gap: 6px; }
+html.notch .fig.range { font-size: 30px; }
+html.notch .lines { gap: 8px; }
+/* the estimate stays one compact card: bars on the left, the price on the right */
+html.notch .card.hero { padding: 12px 16px; }
+html.notch .hero-body { grid-template-columns: minmax(0, 1fr) auto; gap: 18px; }
+html.notch .hero-body .fig.range { order: 0; text-align: right; }
+html.notch .hero-body .fig.range small { text-align: right; margin-top: 4px; }
+html.notch .line { gap: 2px; }
+html.notch .row { padding: 6px 0; }
+html.notch .prod-head { padding: 4px 0; grid-template-columns: minmax(0, 1fr) auto minmax(7ch, auto); }
+html.notch .prod-head .n { grid-column: auto; }
+html.notch .products { gap: 12px; }
+html.notch .group > .pill { margin-bottom: 2px; }
+/* a task is one line: name, days, stepper, remove */
+html.notch .task { grid-template-columns: minmax(0, 1fr) auto auto auto; }
+html.notch .task input.name { grid-column: auto; }
+html.notch .task { padding: 4px 0; }
+html.notch .step button, html.notch .x { font-size: 15px; }
+html.notch .opt { min-height: 30px; }
+html.notch .chip { padding: .3em .8em; }
+
 @media print {
   .topnotch, .island, .bezel, .arrow, .notch-arrow, .action, #statusTog { display: none !important; }
   .view:not(#view-quote) { display: none !important; } #view-quote { display: grid !important; }
