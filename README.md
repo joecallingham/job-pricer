@@ -24,6 +24,10 @@ The server finds that folder by itself; set `DATA_DIR` to use another. Without D
 - Keep a server running at login: `scripts/com.sumojoe.jobpricer.plist` (instructions inside the file).
 - After pulling new code on the Mac mini: `launchctl kickstart -k gui/$(id -u)/com.sumojoe.jobpricer`.
 
+Quick quote (`/quick`, `src/rough.js`): the notch's Pricer tab. Describe a job or drop a brief on the notch and
+it matches the words to the catalogue (no AI, so no key or credit) for a rough range and a short breakdown.
+"Open in Pricer" saves it as a draft and opens the full app on it (`/?quote=<id>#tasks`).
+
 Two Macs editing the same quote at the same moment: the last save wins. The phone isn't supported (Joe, 23 Nov).
 The server only listens on the Mac it runs on, so nothing is on the internet.
 

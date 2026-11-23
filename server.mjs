@@ -125,10 +125,11 @@ async function body(req, limit = 2_000_000) {
 
 async function staticFile(res, urlPath) {
   const map = urlPath === '/' ? '/public/index.html'
-    : ['/src/pricing.js', '/src/catalogue.js', '/src/invoice.js'].includes(urlPath) ? urlPath
+    : urlPath === '/quick' ? '/public/quick.html'
+    : ['/src/pricing.js', '/src/catalogue.js', '/src/invoice.js', '/src/rough.js'].includes(urlPath) ? urlPath
     : `/public${urlPath}`;
   const file = normalize(join(ROOT, map));
-  if (!file.startsWith(join(ROOT, 'public')) && ![join(ROOT, 'src', 'pricing.js'), join(ROOT, 'src', 'catalogue.js'), join(ROOT, 'src', 'invoice.js')].includes(file)) return send(res, 404, { error: 'Not found' });
+  if (!file.startsWith(join(ROOT, 'public')) && ![join(ROOT, 'src', 'pricing.js'), join(ROOT, 'src', 'catalogue.js'), join(ROOT, 'src', 'invoice.js'), join(ROOT, 'src', 'rough.js')].includes(file)) return send(res, 404, { error: 'Not found' });
   try { send(res, 200, await readFile(file), TYPES[extname(file)] || 'application/octet-stream'); }
   catch { send(res, 404, { error: 'Not found' }); }
 }

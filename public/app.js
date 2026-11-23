@@ -433,7 +433,10 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').cat
   p.disabled = !claudeOn;
   if (!claudeOn) { p.title = 'Add an Anthropic API key to .env to switch this on'; p.classList.remove('primary'); $('blankBtn').classList.add('primary'); }
   // Reopen the quote you were last on (per device; the quote itself lives on the server).
-  let last = null; try { last = localStorage.getItem('pricer:last'); } catch {}
+  // ?quote=<id> opens that quote (the notch's quick quote sends you here), else the last one.
+  let last = new URLSearchParams(location.search).get('quote');
+  if (last) { try { localStorage.setItem('pricer:last', last); } catch {} history.replaceState(null, '', `/${location.hash}`); }
+  else { try { last = localStorage.getItem('pricer:last'); } catch {} }
   if (last) {
     try { const r = await fetch(`/api/quotes/${last}`); if (r.ok) { q = { ...newQuote(), ...(await r.json()) }; q.addons = { ...emptyAddons(), ...q.addons }; fillBrief(); } } catch {}
   }
